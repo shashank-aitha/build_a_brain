@@ -23,18 +23,22 @@ const Index = () => {
           <div className="flex items-center justify-center gap-3 mb-6">
             <Brain className="h-12 w-12 text-primary neural-pulse" />
             <h1 className="text-5xl md:text-6xl font-display font-black bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-              Neural Vision
+              Build-A-Brain
             </h1>
           </div>
           
+          <p className="text-lg text-muted-foreground/80 mb-4">
+            By: Shashank Aitha
+          </p>
+          
           <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Experience how computer vision processes visual input through object detection,
-            mirroring how the brain transforms raw sensory data into meaningful perception.
+            Explore how a brain-like system turns raw visual sensation into meaningful perception,
+            tracing the path from camera input to object recognition and explanation.
           </p>
 
           <div className="flex items-center justify-center gap-2 text-primary/70">
             <Sparkles className="h-5 w-5" />
-            <span className="text-sm font-medium">Powered by AI Vision</span>
+            <span className="text-sm font-medium">From Sensation to Perception</span>
           </div>
         </header>
 
@@ -45,7 +49,7 @@ const Index = () => {
             <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-8">
               <h2 className="text-2xl font-display font-bold mb-6 flex items-center gap-2">
                 <span className="text-primary">01</span>
-                <span>Visual Input</span>
+                <span>Sensation</span>
               </h2>
               <CameraView onDetection={setDetectionResult} />
             </div>
@@ -56,7 +60,7 @@ const Index = () => {
             <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-8">
               <h2 className="text-2xl font-display font-bold mb-6 flex items-center gap-2">
                 <span className="text-accent">02</span>
-                <span>Neural Processing</span>
+                <span>Perception</span>
               </h2>
               
               {detectionResult ? (
@@ -69,7 +73,7 @@ const Index = () => {
                   <div className="space-y-4">
                     <Brain className="h-16 w-16 mx-auto text-muted-foreground/30 neural-pulse" />
                     <p className="text-muted-foreground">
-                      Capture or upload an image to see object detection in action
+                      Capture or upload an image to trace sensation to perception
                     </p>
                   </div>
                 </div>

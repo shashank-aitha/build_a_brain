@@ -12,39 +12,52 @@ serve(async (req) => {
 
   try {
     const { imageData } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
     
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    if (!ANTHROPIC_API_KEY) {
+      throw new Error("ANTHROPIC_API_KEY is not configured");
     }
 
     console.log("Processing image for object detection...");
 
-    // Use Lovable AI with vision model to detect objects
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    // Extract base64 data from data URL (remove data:image/...;base64, prefix)
+    const base64Data = imageData.includes(",") ? imageData.split(",")[1] : imageData;
+    
+    // Determine image type from data URL or default to jpeg
+    let imageType = "image/jpeg";
+    if (imageData.startsWith("data:")) {
+      const match = imageData.match(/data:image\/(\w+);base64/);
+      if (match) {
+        imageType = `image/${match[1]}`;
+      }
+    }
+
+    // Use Claude API with vision model to detect objects
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "claude-sonnet-4-5-20250929",
+        max_tokens: 1024,
+        system: "You are an object detection system. Analyze images and identify all visible objects. Return a JSON response with: 1) 'objects' array containing object names with confidence scores, 2) 'explanation' This is for a psych class. Pretend you are the brain and explain how visual system processes this input from sensation to perception in 2-3 sentences. Do not use em dashes Be specific about what you see.",
         messages: [
-          {
-            role: "system",
-            content: "You are an object detection system. Analyze images and identify all visible objects. Return a JSON response with: 1) 'objects' array containing object names with confidence scores, 2) 'explanation' describing how the visual system processes this input from sensation to perception in 2-3 sentences. Be specific about what you see."
-          },
           {
             role: "user",
             content: [
               {
                 type: "text",
-                text: "Detect and label all objects in this image. Provide confidence scores and explain the perception process."
+                text: "Detect and label all objects in this image. Provide confidence scores and explain the perception process. Return your response as valid JSON with 'objects' (array of {name, confidence}) and 'explanation' (string) fields."
               },
               {
-                type: "image_url",
-                image_url: {
-                  url: imageData
+                type: "image",
+                source: {
+                  type: "base64",
+                  media_type: imageType,
+                  data: base64Data
                 }
               }
             ]
@@ -55,7 +68,7 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
+      console.error("Claude API error:", response.status, errorText);
       
       if (response.status === 429) {
         return new Response(
@@ -64,18 +77,21 @@ serve(async (req) => {
         );
       }
       
-      if (response.status === 402) {
+      if (response.status === 401 || response.status === 403) {
         return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Please add credits to continue." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({ error: "API authentication failed. Please check your API key." }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       
-      throw new Error(`AI gateway error: ${response.status}`);
+      throw new Error(`Claude API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
+    // Claude API returns content as an array of content blocks
+    const contentBlocks = data.content || [];
+    const textBlock = contentBlocks.find((block: any) => block.type === "text");
+    const content = textBlock?.text || contentBlocks[0]?.text || "";
 
     console.log("AI Response:", content);
 

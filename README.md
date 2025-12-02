@@ -50,6 +50,52 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
+## Local Development with Claude API
+
+This project uses Claude API (Anthropic) for object detection via Supabase Edge Functions. Supabase is used **only for serverless functions** (no database needed).
+
+**Quick Start:**
+
+1. Install dependencies: `npm install`
+2. Install Supabase CLI: `npm install -g supabase` (or `brew install supabase/tap/supabase` on macOS)
+3. Start Supabase: `supabase start`
+4. Set your Claude API key: `supabase secrets set ANTHROPIC_API_KEY=YOUR_ANTHROPIC_API_KEY`
+5. Create `.env` file with your local Supabase credentials (from `supabase start` output)
+6. Start dev server: `npm run dev`
+
+**For detailed setup instructions, see [LOCAL_SETUP.md](./LOCAL_SETUP.md)**
+
+## Publishing/Deployment
+
+**Supabase Free Tier** is perfect for this app! It includes:
+- ✅ **500,000 Edge Function invocations/month** (plenty for occasional use)
+- ✅ **5 GB bandwidth/month**
+- ✅ Free hosting for Edge Functions
+
+**To publish:**
+
+1. **Deploy Edge Function to Supabase Cloud:**
+   ```bash
+   # Link to your Supabase project (create one at supabase.com)
+   supabase link --project-ref your-project-ref
+   
+   # Deploy the function
+   supabase functions deploy detect-objects
+   
+   # Set the API key in production
+   supabase secrets set ANTHROPIC_API_KEY=YOUR_ANTHROPIC_API_KEY
+   ```
+
+2. **Deploy Frontend** (Vercel, Netlify, etc.):
+   ```bash
+   npm run build
+   ```
+   Then deploy the `dist` folder and set environment variables:
+   - `VITE_SUPABASE_URL` = Your Supabase project URL
+   - `VITE_SUPABASE_PUBLISHABLE_KEY` = Your Supabase anon key
+
+The free tier easily handles occasional requests - you're all set! 🚀
+
 ## What technologies are used for this project?
 
 This project is built with:
@@ -59,6 +105,8 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- Supabase (Edge Functions)
+- Claude API (Anthropic) for vision/object detection
 
 ## How can I deploy this project?
 
