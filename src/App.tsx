@@ -9,14 +9,14 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 // Get base path from import.meta.env (set by Vite) or default to "/"
-// Ensure it ends with a slash for proper routing
+// React Router basename should NOT have a trailing slash
 let basePath = import.meta.env.BASE_URL || "/";
-if (!basePath.endsWith('/')) {
-  basePath += '/';
-}
+// Remove trailing slash for React Router basename
+const routerBasename = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
 
 // Debug logging (remove in production if needed)
-console.log('Base path:', basePath);
+console.log('Vite base path:', basePath);
+console.log('Router basename:', routerBasename);
 console.log('Current pathname:', window.location.pathname);
 
 // Handle GitHub Pages 404.html redirect pattern
@@ -34,7 +34,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter basename={basePath}>
+      <BrowserRouter basename={routerBasename}>
         <Routes>
           <Route path="/" element={<Index />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
