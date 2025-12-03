@@ -17,7 +17,17 @@ if (!basePath.startsWith('/')) basePath = '/' + basePath;
 if (!basePath.endsWith('/')) basePath = basePath + '/';
 
 // React Router basename should NOT have a trailing slash
-const routerBasename = basePath.slice(0, -1) || "/";
+// But we need to match exactly what's in the URL
+let routerBasename = basePath.slice(0, -1) || "/";
+
+// Special handling: if basePath is just "/", keep basename as "/"
+// Otherwise ensure basename matches the pathname format
+if (basePath === "/") {
+  routerBasename = "/";
+} else {
+  // Ensure basename doesn't have trailing slash for React Router
+  routerBasename = routerBasename || "/";
+}
 
 // Debug logging
 console.log('=== Routing Debug ===');
@@ -39,12 +49,15 @@ if (window.location.search.includes('?/')) {
   window.history.replaceState({}, '', newPath);
 }
 
-// If we're at the root path with trailing slash, ensure React Router can match it
-// GitHub Pages serves /build_a_brain/ as the root, but React Router needs exact match
+// If we're at the root path, ensure we can match it
+// GitHub Pages serves /build_a_brain/ as the root
 const currentPath = window.location.pathname;
-if (currentPath === basePath && currentPath !== '/') {
-  // We're at the exact base path - this should match "/" route
+const normalizedCurrentPath = currentPath.endsWith('/') ? currentPath : currentPath + '/';
+
+if (normalizedCurrentPath === basePath && currentPath !== '/') {
   console.log('At base path, should match root route');
+  // If pathname exactly matches basePath, React Router should strip it and match "/"
+  // But if it's not matching, we might need to handle it differently
 }
 
 // Component to debug routing and handle edge cases
