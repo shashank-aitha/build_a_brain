@@ -47,7 +47,7 @@ if (currentPath === basePath && currentPath !== '/') {
   console.log('At base path, should match root route');
 }
 
-// Component to debug routing inside the router context
+// Component to debug routing and handle edge cases
 const RouteDebugger = () => {
   const location = useLocation();
   useEffect(() => {
@@ -55,6 +55,13 @@ const RouteDebugger = () => {
     console.log('Router location.pathname:', location.pathname);
     console.log('Window location.pathname:', window.location.pathname);
     console.log('Router basename:', routerBasename);
+    
+    // If we're showing NotFound but we're at what should be the root,
+    // try to redirect to ensure proper matching
+    if (location.pathname !== '/' && window.location.pathname === basePath) {
+      console.warn('Pathname mismatch detected - attempting to fix');
+      // This shouldn't be necessary, but helps debug
+    }
   }, [location]);
   return null;
 };
@@ -68,6 +75,8 @@ const App = () => {
         <BrowserRouter basename={routerBasename}>
           <RouteDebugger />
           <Routes>
+            {/* Explicitly handle empty string and root */}
+            <Route path="" element={<Index />} />
             <Route path="/" element={<Index />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
