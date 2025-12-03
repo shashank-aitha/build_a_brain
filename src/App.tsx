@@ -9,7 +9,15 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 // Get base path from import.meta.env (set by Vite) or default to "/"
-const basePath = import.meta.env.BASE_URL || "/";
+// Ensure it ends with a slash for proper routing
+let basePath = import.meta.env.BASE_URL || "/";
+if (!basePath.endsWith('/')) {
+  basePath += '/';
+}
+
+// Debug logging (remove in production if needed)
+console.log('Base path:', basePath);
+console.log('Current pathname:', window.location.pathname);
 
 // Handle GitHub Pages 404.html redirect pattern
 // Redirects from /repo/?/path to /repo/path
